@@ -1,0 +1,20 @@
+#%RAML 1.0
+title: RAML example 1
+
+annotationTypes:
+  javaClassName:
+    allowedTargets: TypeDeclaration
+    type: string
+  javaPackageName:
+    allowedTargets: TypeDeclaration
+    type: string
+
+types:
+  Product:
+    type: object
+    (javaClassName): Product
+    (javaPackageName): com.mutsys.foo
+    properties:
+      name: string
+      productId: integer
+    
