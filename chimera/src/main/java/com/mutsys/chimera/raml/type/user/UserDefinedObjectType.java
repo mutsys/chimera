@@ -1,13 +1,15 @@
-package com.mutsys.chimera.raml.type;
+package com.mutsys.chimera.raml.type.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mutsys.chimera.raml.type.RamlTypeFamily;
+
 public class UserDefinedObjectType extends AbstractUserDefinedRamlType {
 
-	private Map<String,Property> properties = new HashMap<>();
+	private Map<String,RamlUserTypeProperty> properties = new HashMap<>();
 	
 	public UserDefinedObjectType() {
 		super(RamlTypeFamily.OBJECT);
@@ -21,15 +23,15 @@ public class UserDefinedObjectType extends AbstractUserDefinedRamlType {
 		return new ArrayList<>(properties.keySet());
 	}
 	
-	public List<Property> getProperties() {
+	public List<RamlUserTypeProperty> getProperties() {
 		return new ArrayList<>(properties.values());
 	}
 	
-	public Property getProperty(String propertyName) {
+	public RamlUserTypeProperty getProperty(String propertyName) {
 		return properties.get(propertyName);
 	}
 	
-	public void addProperty(Property property) {
+	public void addProperty(RamlUserTypeProperty property) {
 		properties.put(property.getName(), property);
 	}
 

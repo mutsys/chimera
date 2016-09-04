@@ -1,13 +1,15 @@
-package com.mutsys.chimera.raml.type;
+package com.mutsys.chimera.raml.type.user;
 
-import com.mutsys.chimera.raml.RamlTypeRegistry;
+import com.mutsys.chimera.raml.RamlTypeModel;
+import com.mutsys.chimera.raml.type.RamlTypeFamily;
 
 public abstract class AbstractUserDefinedRamlType implements UserDefinedRamlType {
 
 	final private RamlTypeFamily typeFamily;
-	private RamlTypeRegistry typeRegistry;
+	private RamlTypeModel typeRegistry;
 	private String superType;
 	private String typeName;
+	private String javaClassType;
 	private String javaClassName;
 	private String javaPackageName;
 
@@ -16,12 +18,12 @@ public abstract class AbstractUserDefinedRamlType implements UserDefinedRamlType
 	}
 
 	@Override
-	public RamlTypeRegistry getTypeRegistry() {
+	public RamlTypeModel getTypeRegistry() {
 		return typeRegistry;
 	}
 
 	@Override
-	public void setTypeRegistry(RamlTypeRegistry typeRegistry) {
+	public void setTypeRegistry(RamlTypeModel typeRegistry) {
 		this.typeRegistry = typeRegistry;
 	}
 
@@ -88,6 +90,26 @@ public abstract class AbstractUserDefinedRamlType implements UserDefinedRamlType
 	@Override
 	public void setJavaPackageName(String javaPackageName) {
 		this.javaPackageName = javaPackageName;
+	}
+
+	@Override
+	public String getJavaClassType() {
+		return javaClassType;
+	}
+
+	@Override
+	public void setJavaClassType(String javaClassType) {
+		this.javaClassType = javaClassType;
+	}
+
+	@Override
+	public boolean isReference() {
+		return false;
+	}
+
+	@Override
+	public boolean isDefinition() {
+		return true;
 	}
 
 }

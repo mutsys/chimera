@@ -25,7 +25,7 @@ public enum BuiltInRamlType implements RamlType {
 	DATETIME      ("datetime",      RamlTypeFamily.SCALAR, ANY,    OffsetDateTime.class, false, false, false, true,  false),
 	OBJECT        ("object",        RamlTypeFamily.OBJECT, ANY,    Object.class,         false, false, false, false, false),
 	NIL           ("nil",           RamlTypeFamily.SCALAR, ANY,    Void.class,           false, false, false, false, true),
-	ARRAY         ("array",         RamlTypeFamily.ARRAY,  ANY,    List.class,          false, false, false, false, false);
+	ARRAY         ("array",         RamlTypeFamily.ARRAY,  ANY,    List.class,           false, false, false, false, false);
 	
 	final private String ramlTypeName;
 	final private RamlTypeFamily typeFamily;
@@ -115,6 +115,16 @@ public enum BuiltInRamlType implements RamlType {
 	@Override
 	public String getSuperType() {
 		return Objects.nonNull(superType) ? superType.getTypeName() : "";
+	}
+
+	@Override
+	public boolean isReference() {
+		return false;
+	}
+
+	@Override
+	public boolean isDefinition() {
+		return false;
 	}
 	
 }

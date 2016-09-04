@@ -11,9 +11,9 @@ import java.util.stream.Stream;
 
 import com.mutsys.chimera.raml.type.BuiltInRamlType;
 import com.mutsys.chimera.raml.type.RamlType;
-import com.mutsys.chimera.raml.type.UserDefinedRamlType;
+import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
 
-public class RamlTypeRegistry {
+public class RamlTypeModel {
 	
 	protected final static Comparator<RamlType> dependencyOrdering = (a,b) -> {
 		if (Objects.isNull(a.getSuperType())) {
@@ -37,7 +37,7 @@ public class RamlTypeRegistry {
 	
 	private Map<String,RamlType> ramlTypeMap = new HashMap<>();
 	
-	public RamlTypeRegistry() {
+	public RamlTypeModel() {
 		for (BuiltInRamlType builtInType : BuiltInRamlType.values()) {
 			ramlTypeMap.put(builtInType.getTypeName(), builtInType);
 		}

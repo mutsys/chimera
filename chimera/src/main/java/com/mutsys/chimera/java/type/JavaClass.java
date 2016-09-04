@@ -2,29 +2,14 @@ package com.mutsys.chimera.java.type;
 
 import java.util.List;
 
-import com.mutsys.chimera.java.JavaPackage;
-import com.mutsys.chimera.raml.type.Property;
-
-public interface JavaClass {
+public interface JavaClass extends UserDefinedJavaType {
 	
-	JavaClassType getJavaClassType();
+	JavaClass getSuperClass();
 	
-	public boolean isInterface();
+	void setSuperClass(JavaClass superClass);
 	
-	public boolean isAbstractClass();
+	List<JavaInterface> getImplementedInterfaces();
 	
-	public boolean isConcreteClass();
-	
-	JavaPackage getPackage();
-	
-	void setPackage(JavaPackage pakkage);
-	
-	String getName();
-	
-	void setName(String name);
-	
-	List<Property> getProperties();
-	
-	void setProperties(List<Property> properties);
+	void addImplementedInterface(JavaInterface javaInterface);
 
 }

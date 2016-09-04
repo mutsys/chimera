@@ -1,16 +1,18 @@
-package com.mutsys.chimera.raml.type;
+package com.mutsys.chimera.raml.type.user;
 
-public class Property {
+import com.mutsys.chimera.raml.type.RamlType;
 
-	private String ramlType;
+public class RamlUserTypeProperty {
+
+	private RamlType ramlType;
 	private String name;
 	private boolean required;
 
-	public String getType() {
+	public RamlType getType() {
 		return ramlType;
 	}
 
-	public void setType(String ramlType) {
+	public void setType(RamlType ramlType) {
 		this.ramlType = ramlType;
 	}
 

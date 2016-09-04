@@ -9,19 +9,22 @@ import org.raml.v2.api.model.v10.api.Library;
 import org.raml.v2.api.model.v10.api.LibraryBase;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 
-import com.mutsys.chimera.raml.RamlTypeRegistry;
-import com.mutsys.chimera.raml.type.factory.UserDefinedArrayTypeFactory;
-import com.mutsys.chimera.raml.type.factory.UserDefinedObjectTypeFactory;
-import com.mutsys.chimera.raml.type.factory.UserDefinedScalarTypeFactory;
+import com.mutsys.chimera.raml.RamlTypeModel;
+import com.mutsys.chimera.raml.type.user.UserDefinedArrayTypeFactory;
+import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
+import com.mutsys.chimera.raml.type.user.UserDefinedObjectTypeFactory;
+import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
+import com.mutsys.chimera.raml.type.user.UserDefinedScalarTypeFactory;
 
 public class RamlTypeFactory {
 
-	public static RamlTypeRegistry getTypes(Api api) {
+	public static RamlTypeModel getTypes(Api api) {
 		List<TypeDeclaration> types = getTypes((LibraryBase) api);
 		List<UserDefinedRamlType> ramlTypes = convertTypes(types);		
-		RamlTypeRegistry registry = new RamlTypeRegistry();
-		ramlTypes.forEach(registry::addRamlType);
-		return registry;
+		RamlTypeModel typeModel = new RamlTypeModel();
+		ramlTypes.forEach(typeModel::addRamlType);
+		resolveTypeReferences(typeModel);
+		return typeModel;
 	}
 	
 	protected static List<TypeDeclaration> getTypes(LibraryBase library) {
@@ -75,6 +78,18 @@ public class RamlTypeFactory {
 	protected static boolean isObjectType(TypeDeclaration typeDeclaration) {
 		RamlType builtInType = BuiltInRamlType.getType(typeDeclaration.type());
 		return Objects.isNull(builtInType) || Objects.nonNull(builtInType) && builtInType.isObject();
+	}
+	
+	protected static void resolveTypeReferences(RamlTypeModel typeModel) {
+		typeModel.getTypes(false).stream()
+			.filter(t -> t.isDefinition())
+			.filter(t -> t.isObject())
+			.map(t -> (UserDefinedObjectType) t)
+			.forEach(t -> t.getProperties().stream()
+							.filter(p -> p.getType().isReference())
+							.map(p -> (RamlTypeReference) p.getType())
+							.forEach(r -> r.setReferencedType(typeModel.getType(r.getTypeName())))
+					);
 	}
 	
 }

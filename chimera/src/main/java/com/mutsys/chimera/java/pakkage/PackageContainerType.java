@@ -1,4 +1,4 @@
-package com.mutsys.chimera.java;
+package com.mutsys.chimera.java.pakkage;
 
 public enum PackageContainerType {
 	

@@ -1,16 +1,21 @@
-package com.mutsys.chimera.raml.type;
+package com.mutsys.chimera.raml.type.user;
 
-import com.mutsys.chimera.raml.RamlTypeRegistry;
+import com.mutsys.chimera.raml.RamlTypeModel;
+import com.mutsys.chimera.raml.type.RamlType;
 
 public interface UserDefinedRamlType extends RamlType {
 
-	RamlTypeRegistry getTypeRegistry();
+	RamlTypeModel getTypeRegistry();
 	
-	void setTypeRegistry(RamlTypeRegistry typeRegistry);
+	void setTypeRegistry(RamlTypeModel typeRegistry);
 	
 	void setTypeName(String typeName);
 
 	void setSuperType(String superType);
+	
+	String getJavaClassType();
+	
+	void setJavaClassType(String javaClassType);
 	
 	String getJavaClassName();
 	

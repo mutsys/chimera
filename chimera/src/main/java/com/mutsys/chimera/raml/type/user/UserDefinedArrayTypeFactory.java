@@ -1,10 +1,7 @@
-package com.mutsys.chimera.raml.type.factory;
+package com.mutsys.chimera.raml.type.user;
 
 import org.raml.v2.api.model.v10.datamodel.ArrayTypeDeclaration;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
-
-import com.mutsys.chimera.raml.type.UserDefinedArrayType;
-import com.mutsys.chimera.raml.type.UserDefinedRamlType;
 
 public class UserDefinedArrayTypeFactory implements UserDefinedRamlTypeFactory {
 
