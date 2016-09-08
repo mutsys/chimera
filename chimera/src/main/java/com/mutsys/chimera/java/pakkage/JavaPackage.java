@@ -2,6 +2,7 @@ package com.mutsys.chimera.java.pakkage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.mutsys.chimera.java.JavaHierarchyMember;
 import com.mutsys.chimera.java.type.UserDefinedJavaType;
@@ -43,6 +44,14 @@ public class JavaPackage extends AbstractPackageContainer<JavaPackage> implement
 			nameBuilder.insert(0, pakkage.getName());
 		}
 		return nameBuilder.toString();
+	}
+	
+	public List<String> getClassNames() {
+		return classes.stream().map(c -> c.getName()).collect(Collectors.toList());
+	}
+	
+	public UserDefinedJavaType getClass(String className) {
+		return classes.stream().filter(c -> c.getName().equals(className)).findFirst().orElse(null);
 	}
 
 	public List<UserDefinedJavaType> getClasses() {

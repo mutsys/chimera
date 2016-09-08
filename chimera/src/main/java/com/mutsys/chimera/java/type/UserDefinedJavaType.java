@@ -22,6 +22,10 @@ public interface UserDefinedJavaType extends RamlJavaType {
 	
 	List<JavaProperty> getProperties();
 	
+	List<String> getPropertyNames();
+	
+	JavaProperty getProperty(String propertyName);
+	
 	void addProperty(JavaProperty property);
 
 }

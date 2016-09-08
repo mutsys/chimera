@@ -2,6 +2,7 @@ package com.mutsys.chimera.java.type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.mutsys.chimera.java.pakkage.JavaPackage;
 
@@ -49,6 +50,16 @@ public abstract class AbstractUserDefinedJavaType extends AbstractJavaType imple
 	@Override
 	public List<JavaProperty> getProperties() {
 		return properties;
+	}
+	
+	@Override
+	public List<String> getPropertyNames() {
+		return properties.stream().map(p -> p.getName()).collect(Collectors.toList());
+	}
+
+	@Override
+	public JavaProperty getProperty(String propertyName) {
+		return properties.stream().filter(p -> p.getName().equals(propertyName)).findFirst().orElse(null);
 	}
 
 	@Override
