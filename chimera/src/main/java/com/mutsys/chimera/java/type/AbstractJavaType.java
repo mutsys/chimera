@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class AbstractJavaType implements JavaType {
+public abstract class AbstractJavaType implements RamlJavaType {
 
 	private final static String JAVA = "java.";
 	private final static String JAVAX = "javax.";

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.mutsys.chimera.java.pakkage.JavaPackage;
 
-public interface UserDefinedJavaType extends JavaType {
+public interface UserDefinedJavaType extends RamlJavaType {
 	
 	JavaClassType getJavaClassType();
 	

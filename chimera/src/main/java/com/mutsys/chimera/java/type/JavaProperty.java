@@ -3,7 +3,7 @@ package com.mutsys.chimera.java.type;
 public class JavaProperty {
 
 	private String name;
-	private JavaType javaType;
+	private RamlJavaType javaType;
 
 	public String getName() {
 		return name;
@@ -13,11 +13,11 @@ public class JavaProperty {
 		this.name = name;
 	}
 
-	public JavaType getJavaType() {
+	public RamlJavaType getJavaType() {
 		return javaType;
 	}
 
-	public void setJavaType(JavaType javaType) {
+	public void setJavaType(RamlJavaType javaType) {
 		this.javaType = javaType;
 	}
 
