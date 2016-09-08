@@ -3,9 +3,13 @@ package com.mutsys.chimera.codegen;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +54,37 @@ public class JavaCodeFactory {
 		codeFormatProps.setProperty(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		
 		File outputDir = new File(destDir);
+		if (outputDir.exists()) {
+			try {
+				Files.walkFileTree(outputDir.toPath(), new FileVisitor<Path>() {
+	
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+						return FileVisitResult.CONTINUE;
+					}
+	
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						file.toFile().delete();
+						return FileVisitResult.CONTINUE;
+					}
+	
+					@Override
+					public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+						return FileVisitResult.CONTINUE;
+					}
+	
+					@Override
+					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+						dir.toFile().delete();
+						return FileVisitResult.CONTINUE;
+					}
+					
+				});
+			} catch (IOException e) {
+				LOG.error("unable to clean code generation destination directory", e);
+			}
+		}
 		outputDir.mkdirs();
 		for (JavaSource<?> javaSource : generatedJavaTypeMap.values()) {
 			String packageName = javaSource.getPackage();
@@ -66,8 +101,6 @@ public class JavaCodeFactory {
 			} catch (IOException e) {
 				LOG.error("unable to create writer for " + javaSource.getQualifiedName() + ".java", e);
 			}
-
-			
 		}
 	}
 	
