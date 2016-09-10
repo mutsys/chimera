@@ -1,17 +1,27 @@
 package com.mutsys.chimera.java;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.mutsys.chimera.java.pakkage.JavaPackage;
 import com.mutsys.chimera.java.type.JavaClassType;
 import com.mutsys.chimera.java.type.JavaInterface;
 import com.mutsys.chimera.java.type.JavaProperty;
+import com.mutsys.chimera.java.type.JavaPropertyCardinality;
 import com.mutsys.chimera.java.type.JavaTypeReference;
 import com.mutsys.chimera.java.type.ProvidedJavaType;
+import com.mutsys.chimera.java.type.RamlJavaType;
 import com.mutsys.chimera.raml.RamlTypeModel;
 import com.mutsys.chimera.raml.type.BuiltInRamlType;
 import com.mutsys.chimera.raml.type.RamlType;
+import com.mutsys.chimera.raml.type.RamlTypeDefinition;
+import com.mutsys.chimera.raml.type.RamlTypeReference;
+import com.mutsys.chimera.raml.type.RamlArrayType;
 import com.mutsys.chimera.raml.type.user.RamlUserTypeProperty;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
@@ -76,35 +86,84 @@ public class JavaTypeModelFactory {
 		JavaInterface javaInterface = new JavaInterface();
 		javaInterface.setName(ramlType.getJavaClassName());
 		javaTypeModel.getPackage(ramlType.getJavaPackageName()).addClass(javaInterface);
-		for (RamlUserTypeProperty property : ramlType.getProperties()) {
-			RamlType propertyType = property.getType();
-			if (propertyType.isBuiltInType()) {
-				javaInterface.addProperty(createBuiltInProperty(property.getName(), (BuiltInRamlType) propertyType));
+		for (RamlUserTypeProperty ramlProperty : getDefinedProperties(ramlType)) {
+			javaInterface.addProperty(createJavaProperty(ramlProperty));
+		}
+		if (Objects.nonNull(ramlType.getSuperType())) {
+			RamlTypeDefinition ramlSuperType = ramlType.getTypeRegistry().getType(ramlType.getSuperType());
+			if (ramlSuperType.isDefinition()) {
+				UserDefinedObjectType userDefinedSuperType = (UserDefinedObjectType) ramlSuperType;
+				JavaTypeReference superInterface = new JavaTypeReference();
+				superInterface.setName(userDefinedSuperType.getJavaClassName());
+				superInterface.setPackageName(userDefinedSuperType.getJavaPackageName());
+				javaInterface.addExtendedInterface(superInterface);
 			}
-			if (propertyType.isDefinition()) {
-				javaInterface.addProperty(createTypeReferenceProperty(property.getName(), (UserDefinedRamlType) propertyType));
-			}
-		}		
-		
+		}
 	}
 	
-	protected static JavaProperty createBuiltInProperty(String propertyName, BuiltInRamlType ramlType) {
+	protected static List<RamlUserTypeProperty> getDefinedProperties(UserDefinedObjectType ramlType) {
+		Set<String> inheritedProperties = getInheritedProperties(ramlType);
+		List<String> definedProperties = ramlType.getPropertyNames();
+		definedProperties.removeAll(inheritedProperties);
+		return definedProperties.stream().map(p -> ramlType.getProperty(p)).collect(Collectors.toList());
+	}
+	
+	protected static UserDefinedObjectType getSuperType(UserDefinedObjectType ramlType) {
+		RamlType superType = ramlType.getTypeRegistry().getType(ramlType.getSuperType());
+		if (superType.isDefinition()) {
+			return (UserDefinedObjectType) superType;
+		}
+		return null;
+	}
+	
+	protected static Set<String> getInheritedProperties(UserDefinedObjectType ramlType) {
+		Set<String> inheritedProperties = new HashSet<>();
+		UserDefinedObjectType superType = getSuperType(ramlType);
+		while (superType != null && !superType.isBuiltInType()) {
+			inheritedProperties.addAll(superType.getPropertyNames());
+			superType = getSuperType(superType);
+		}
+		return inheritedProperties;
+	}
+	
+	protected static JavaProperty createJavaProperty(RamlUserTypeProperty ramlProperty) {
 		JavaProperty javaProperty = new JavaProperty();
-		javaProperty.setName(propertyName);
-		ProvidedJavaType propertyType = new ProvidedJavaType();
-		propertyType.setProvidedClass(ramlType.getJavaClass());
-		javaProperty.setJavaType(propertyType);
+		javaProperty.setName(ramlProperty.getName());
+		RamlType ramlType = ramlProperty.getType();
+		JavaPropertyCardinality cardinality = JavaPropertyCardinality.getCardinality(ramlType.getTypeFamily());
+		javaProperty.setCardinality(cardinality);
+		if (cardinality.equals(JavaPropertyCardinality.LIST)) {
+			populateListProperty(javaProperty, (RamlArrayType) ramlType);
+		} else {
+			javaProperty.setJavaType(createJavaType(ramlType));
+		}
 		return javaProperty;
 	}
 	
-	protected static JavaProperty createTypeReferenceProperty(String propertyName, UserDefinedRamlType ramlType) {
-		JavaProperty javaProperty = new JavaProperty();
-		javaProperty.setName(propertyName);
-		JavaTypeReference propertyType = new JavaTypeReference();
-		propertyType.setName(ramlType.getJavaClassName());
-		propertyType.setPackageName(ramlType.getJavaPackageName());
-		javaProperty.setJavaType(propertyType);
-		return javaProperty;
+	protected static void populateListProperty(JavaProperty javaProperty, RamlArrayType ramlType) {
+		RamlType memberType = ramlType.getReferencedType();
+		javaProperty.setJavaType(createJavaType(memberType));
+	}
+	
+	protected static RamlJavaType createJavaType(RamlType ramlType) {
+		if (ramlType.isBuiltInType()) {
+			BuiltInRamlType builtInType = (BuiltInRamlType) ramlType;
+			ProvidedJavaType propertyType = new ProvidedJavaType();
+			propertyType.setProvidedClass(builtInType.getJavaClass());
+			return propertyType;
+		}
+		if (ramlType.isDefinition()) {
+			UserDefinedObjectType typeDefinition = (UserDefinedObjectType) ramlType;
+			JavaTypeReference propertyType = new JavaTypeReference();
+			propertyType.setName(typeDefinition.getJavaClassName());
+			propertyType.setPackageName(typeDefinition.getJavaPackageName());
+			return propertyType;
+		}
+		if (ramlType.isReference()) {
+			RamlTypeReference typeReference = (RamlTypeReference) ramlType;
+			return createJavaType(typeReference.getReferencedType());
+		}
+		return null;
 	}
 
 }

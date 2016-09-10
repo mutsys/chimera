@@ -8,8 +8,8 @@ public interface JavaClass extends UserDefinedJavaType {
 	
 	void setSuperClass(JavaClass superClass);
 	
-	List<JavaInterface> getImplementedInterfaces();
+	List<JavaTypeReference> getImplementedInterfaces();
 	
-	void addImplementedInterface(JavaInterface javaInterface);
+	void addImplementedInterface(JavaTypeReference javaInterface);
 
 }

@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum BuiltInRamlType implements RamlType {
+public enum BuiltInRamlType implements RamlTypeDefinition {
 
 	ANY           ("any",           RamlTypeFamily.ANY,    null,   Type.class,           false, false, false, false, false),
 	BOOLEAN       ("boolean",       RamlTypeFamily.SCALAR, ANY,    Boolean.class,        true,  false, false, false, false),

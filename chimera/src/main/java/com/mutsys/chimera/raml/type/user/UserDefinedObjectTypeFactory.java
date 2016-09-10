@@ -1,12 +1,15 @@
 package com.mutsys.chimera.raml.type.user;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.raml.v2.api.model.v10.datamodel.ArrayTypeDeclaration;
 import org.raml.v2.api.model.v10.datamodel.ObjectTypeDeclaration;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 
 import com.mutsys.chimera.raml.type.BuiltInRamlType;
+import com.mutsys.chimera.raml.type.RamlArrayType;
+import com.mutsys.chimera.raml.type.RamlTypeFamily;
+import com.mutsys.chimera.raml.type.RamlTypeIntrospector;
 import com.mutsys.chimera.raml.type.RamlTypeReference;
 
 public class UserDefinedObjectTypeFactory implements UserDefinedRamlTypeFactory {
@@ -32,10 +35,26 @@ public class UserDefinedObjectTypeFactory implements UserDefinedRamlTypeFactory 
 		RamlUserTypeProperty property = new RamlUserTypeProperty();
 		property.setName(typeDeclaration.name());
 		property.isRequired(typeDeclaration.required());
-		if (isBuiltInRamlType(typeDeclaration)) {
-			property.setType(BuiltInRamlType.getType(typeDeclaration.type()));
-		} else {
-			RamlTypeReference typeReference = new RamlTypeReference(typeDeclaration.type());		
+		RamlTypeFamily typeFamily = RamlTypeIntrospector.getRamlTypeFamily(typeDeclaration);
+		if (RamlTypeFamily.SCALAR.equals(typeFamily)) {
+			if (RamlTypeIntrospector.isBuiltInRamlType(typeDeclaration)) {
+				property.setType(BuiltInRamlType.getType(typeDeclaration.type()));
+			} else {
+				RamlTypeReference typeReference = new RamlTypeReference();
+				typeReference.setReferencedTypeName(typeDeclaration.type());
+				property.setType(typeReference);
+			}
+		}
+		if (RamlTypeFamily.ARRAY.equals(typeFamily)) {
+			ArrayTypeDeclaration arrayDeclaration = (ArrayTypeDeclaration) typeDeclaration;
+			String memberTypeName = arrayDeclaration.items().name();
+			RamlArrayType arrayType = new RamlArrayType();
+			arrayType.setReferencedTypeName(memberTypeName);
+			property.setType(arrayType);
+		}
+		if (RamlTypeFamily.OBJECT.equals(typeFamily)) {
+			RamlTypeReference typeReference = new RamlTypeReference();
+			typeReference.setReferencedTypeName(typeDeclaration.type());
 			property.setType(typeReference);
 		}
 		return property;
@@ -49,8 +68,6 @@ public class UserDefinedObjectTypeFactory implements UserDefinedRamlTypeFactory 
 			.orElse("");
 	}
 	
-	protected static boolean isBuiltInRamlType(TypeDeclaration typeDeclaration) {
-		return Objects.nonNull(BuiltInRamlType.getType(typeDeclaration.type()));
-	}
+	
 
 }

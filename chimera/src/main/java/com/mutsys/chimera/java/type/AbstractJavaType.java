@@ -13,7 +13,7 @@ public abstract class AbstractJavaType implements RamlJavaType {
 	
 	private final static Set<String> AUTOBOXED = Stream.of(Boolean.class, Byte.class, Short.class, Character.class, Integer.class,
 			Float.class, Long.class, Double.class).map(c -> c.getCanonicalName()).collect(Collectors.toSet());
-	
+
 	@Override
 	public boolean isJvmType() {
 		String canonicalName = getCanonicalName();

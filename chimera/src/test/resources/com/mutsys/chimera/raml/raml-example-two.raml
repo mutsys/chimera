@@ -1,0 +1,21 @@
+#%RAML 1.0
+title: RAML example 2
+
+uses:
+  codeGen: java-codegen-annotations.raml
+
+types:
+  Person:
+    (codeGen.javaClassType): interface
+    (codeGen.javaClassName): Person
+    (codeGen.javaPackageName): com.mutsys.exampleTwo
+    properties:
+      name: string
+  Manager:
+    type: Person
+    (codeGen.javaClassType): interface
+    (codeGen.javaClassName): Manager
+    (codeGen.javaPackageName): com.mutsys.exampleTwo
+    properties:
+      manages: Person[]
+      

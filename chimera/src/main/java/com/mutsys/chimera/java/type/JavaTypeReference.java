@@ -21,12 +21,12 @@ public class JavaTypeReference extends AbstractJavaType {
 
 	@Override
 	public String getCanonicalName() {
-		return new StringBuilder(javaTypeName)
+		return new StringBuilder(javaTypePackageName)
 				.append(".")
-				.append(javaTypePackageName)
+				.append(javaTypeName)
 				.toString();
 	}
-
+	
 	@Override
 	public String getPackageName() {
 		return javaTypePackageName;

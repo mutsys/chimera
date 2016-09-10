@@ -4,6 +4,7 @@ public class JavaProperty {
 
 	private String name;
 	private RamlJavaType javaType;
+	private JavaPropertyCardinality cardinality;
 
 	public String getName() {
 		return name;
@@ -19,6 +20,14 @@ public class JavaProperty {
 
 	public void setJavaType(RamlJavaType javaType) {
 		this.javaType = javaType;
+	}
+
+	public JavaPropertyCardinality getCardinality() {
+		return cardinality;
+	}
+
+	public void setCardinality(JavaPropertyCardinality cardinality) {
+		this.cardinality = cardinality;
 	}
 
 }

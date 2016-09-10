@@ -1,24 +1,15 @@
 #%RAML 1.0
 title: RAML example 1
 
-annotationTypes:
-  javaClassType:
-    allowedTargets: TypeDeclaration
-    type: string
-    enum: ['interface','abstractClass','concreteClass']
-  javaClassName:
-    allowedTargets: TypeDeclaration
-    type: string
-  javaPackageName:
-    allowedTargets: TypeDeclaration
-    type: string
+uses:
+  codeGen: java-codegen-annotations.raml
 
 types:
   Product:
     type: object
-    (javaClassType): interface
-    (javaClassName): Product
-    (javaPackageName): com.mutsys.foo
+    (codeGen.javaClassType): interface
+    (codeGen.javaClassName): Product
+    (codeGen.javaPackageName): com.mutsys.exampleOne
     properties:
       name: string
       productId: integer

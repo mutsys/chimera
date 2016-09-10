@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+usage: |
+  annotations for declaring java type metadata on your
+  raml types to customize java code generation
+
+annotationTypes:
+  javaClassType:
+    allowedTargets: TypeDeclaration
+    type: string
+    enum: ['interface','abstractClass','concreteClass']
+  javaClassName:
+    allowedTargets: TypeDeclaration
+    type: string
+  javaPackageName:
+    allowedTargets: TypeDeclaration
+    type: string

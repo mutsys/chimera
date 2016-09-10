@@ -22,6 +22,7 @@ import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.jboss.forge.roaster.model.JavaType;
 import org.jboss.forge.roaster.model.source.Importer;
+import org.jboss.forge.roaster.model.source.InterfaceCapableSource;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 import org.jboss.forge.roaster.model.source.JavaSource;
@@ -34,7 +35,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mutsys.chimera.java.JavaTypeModel;
 import com.mutsys.chimera.java.pakkage.JavaPackage;
+import com.mutsys.chimera.java.type.JavaClass;
+import com.mutsys.chimera.java.type.JavaInterface;
 import com.mutsys.chimera.java.type.JavaProperty;
+import com.mutsys.chimera.java.type.JavaPropertyCardinality;
+import com.mutsys.chimera.java.type.JavaTypeReference;
 import com.mutsys.chimera.java.type.RamlJavaType;
 import com.mutsys.chimera.java.type.UserDefinedJavaType;
 
@@ -125,32 +130,51 @@ public class JavaCodeFactory {
 	}
 	
 	protected static void createClasses(Map<String,JavaSource<?>> generatedJavaTypeMap, JavaTypeModel typeModel) {
-		new JavaTypeModelVisitor<UserDefinedJavaType>() {
-
-			@Override
-			public void collect(List<UserDefinedJavaType> collection, JavaPackage pakkage) {
-				for (UserDefinedJavaType javaType : pakkage.getClasses()) {
-					collection.add(javaType);
+		List<UserDefinedJavaType> javaTypes =
+			new JavaTypeModelVisitor<UserDefinedJavaType>() {
+	
+				@Override
+				public void collect(List<UserDefinedJavaType> collection, JavaPackage pakkage) {
+					for (UserDefinedJavaType javaType : pakkage.getClasses()) {
+						collection.add(javaType);
+					}
+					
 				}
 				
-			}
-			
-		}.visit(typeModel).forEach(t -> {
+			}.visit(typeModel);
+		
+		javaTypes.forEach(t -> getUserDefinedType(generatedJavaTypeMap, t));
+				
+		javaTypes.forEach(t -> {
 			JavaSource<?> javaType = getUserDefinedType(generatedJavaTypeMap, t);
 			populateImports(javaType, t);
+		});
+		
+		javaTypes.forEach(t -> {
+			JavaSource<?> javaType = getUserDefinedType(generatedJavaTypeMap, t);
 			if (t.isInterface()) {
 				populateProperties(generatedJavaTypeMap, (PropertyHolderSource<?>) javaType, t);
 			}
 		});
+		
+		javaTypes.forEach(t -> {
+			JavaSource<?> javaType = getUserDefinedType(generatedJavaTypeMap, t);
+			implementInterfaces((InterfaceCapableSource<?>) javaType, t);
+		});
+		
 	}
 	
 	protected static void populateProperties(Map<String,JavaSource<?>> generatedJavaTypeMap, PropertyHolderSource<?> propertyHolder, UserDefinedJavaType userDefinedJavaType) {
 		for (JavaProperty property : userDefinedJavaType.getProperties()) {
 			RamlJavaType propertyType = property.getJavaType();
 			PropertySource<?> propertySource;
-			if (propertyType.isUserDefined()) {
+			if (property.getCardinality().equals(JavaPropertyCardinality.OBJECT)) {
 				JavaType<?> generatedJavaType = getUserDefinedType(generatedJavaTypeMap, (UserDefinedJavaType) propertyType);
 				propertySource = propertyHolder.addProperty(generatedJavaType, property.getName());
+			} else if (property.getCardinality().equals(JavaPropertyCardinality.LIST)) {
+				JavaTypeReference memberTypeReference = (JavaTypeReference) propertyType;
+				JavaType<?> memberJavaType = generatedJavaTypeMap.get(memberTypeReference.getCanonicalName());
+				propertySource = propertyHolder.addProperty("List<" + memberJavaType.getName() + ">", property.getName());
 			} else {
 				propertySource = propertyHolder.addProperty(propertyType.getName(), property.getName());
 			}
@@ -159,6 +183,8 @@ public class JavaCodeFactory {
 		}
 	}
 	
+	private static final String LIST_CLASS_NAME = "java.util.List";
+	
 	protected static void populateImports(Importer<?> importer, UserDefinedJavaType userDefinedJavaType) {
 		for (JavaProperty property : userDefinedJavaType.getProperties()) {
 			RamlJavaType propertyType = property.getJavaType();
@@ -166,7 +192,29 @@ public class JavaCodeFactory {
 			if (importer.requiresImport(className) && !importer.hasImport(className)) {
 				importer.addImport(className);
 			}
+			if (property.getCardinality().equals(JavaPropertyCardinality.LIST)) {
+				if (importer.requiresImport(LIST_CLASS_NAME) && !importer.hasImport(LIST_CLASS_NAME)) {
+					importer.addImport(LIST_CLASS_NAME);
+				}
+			}
 		}
+	}
+	
+	protected static void implementInterfaces(InterfaceCapableSource<?> implementor, UserDefinedJavaType userDefinedJavaType) {
+		if (userDefinedJavaType.isInterface()) {
+			JavaInterface javaInterface = (JavaInterface) userDefinedJavaType;
+			implementInterfaces(implementor, javaInterface.getExtendedInterfaces());
+		}
+		if (userDefinedJavaType.isAbstractClass() || userDefinedJavaType.isConcreteClass()) {
+			JavaClass javaClass = (JavaClass) userDefinedJavaType;
+			implementInterfaces(implementor, javaClass.getImplementedInterfaces());
+		}
+	}
+	
+	protected static void implementInterfaces(InterfaceCapableSource<?> implementor, List<JavaTypeReference> interfaces) {
+		interfaces.forEach(i -> {
+			implementor.addInterface(i.getCanonicalName());
+		});
 	}
 	
 	protected static JavaSource<?> getUserDefinedType(Map<String,JavaSource<?>> generatedJavaTypeMap, UserDefinedJavaType userDefinedJavaType) {

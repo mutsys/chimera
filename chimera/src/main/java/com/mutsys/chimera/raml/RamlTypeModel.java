@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.mutsys.chimera.raml.type.BuiltInRamlType;
-import com.mutsys.chimera.raml.type.RamlType;
+import com.mutsys.chimera.raml.type.RamlTypeDefinition;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
 
 public class RamlTypeModel {
 	
-	protected final static Comparator<RamlType> dependencyOrdering = (a,b) -> {
+	protected final static Comparator<RamlTypeDefinition> dependencyOrdering = (a,b) -> {
 		if (Objects.isNull(a.getSuperType())) {
 			return 1;
 		}
@@ -31,11 +31,11 @@ public class RamlTypeModel {
 		return 0;
 	};
 	
-	protected static Predicate<RamlType> noBuiltInTypes = r -> !r.isBuiltInType();
+	protected static Predicate<RamlTypeDefinition> noBuiltInTypes = r -> !r.isBuiltInType();
 	
-	protected static Predicate<RamlType> allTypes = r -> true;
+	protected static Predicate<RamlTypeDefinition> allTypes = r -> true;
 	
-	private Map<String,RamlType> ramlTypeMap = new HashMap<>();
+	private Map<String,RamlTypeDefinition> ramlTypeMap = new HashMap<>();
 	
 	public RamlTypeModel() {
 		for (BuiltInRamlType builtInType : BuiltInRamlType.values()) {
@@ -43,8 +43,8 @@ public class RamlTypeModel {
 		}
 	}
 	
-	protected Stream<RamlType> getRamlTypes(boolean withBuiltInTypes) {
-		Predicate<RamlType> predicate = withBuiltInTypes ? allTypes : noBuiltInTypes;
+	protected Stream<RamlTypeDefinition> getRamlTypes(boolean withBuiltInTypes) {
+		Predicate<RamlTypeDefinition> predicate = withBuiltInTypes ? allTypes : noBuiltInTypes;
 		return ramlTypeMap.values().stream()
 				.filter(predicate)
 				.sorted(dependencyOrdering);
@@ -52,17 +52,18 @@ public class RamlTypeModel {
 	
 	public void addRamlType(UserDefinedRamlType ramlType) {
 		ramlTypeMap.put(ramlType.getTypeName(), ramlType);
+		ramlType.setTypeRegistry(this);
 	}
 	
 	public List<String> getTypeNames(boolean withBuiltInTypes) {
 		return getRamlTypes(withBuiltInTypes).map(t -> t.getTypeName()).collect(Collectors.toList());
 	}
 	
-	public List<RamlType> getTypes(boolean withBuiltInTypes) {
+	public List<RamlTypeDefinition> getTypes(boolean withBuiltInTypes) {
 		return getRamlTypes(withBuiltInTypes).collect(Collectors.toList());
 	}
 	
-	public RamlType getType(String typeName) {
+	public RamlTypeDefinition getType(String typeName) {
 		return ramlTypeMap.get(typeName);
 	}
 

@@ -1,7 +1,6 @@
 package com.mutsys.chimera.raml.type;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.raml.v2.api.model.v10.api.Api;
@@ -10,7 +9,6 @@ import org.raml.v2.api.model.v10.api.LibraryBase;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 
 import com.mutsys.chimera.raml.RamlTypeModel;
-import com.mutsys.chimera.raml.type.user.UserDefinedArrayTypeFactory;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectTypeFactory;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
@@ -42,42 +40,13 @@ public class RamlTypeFactory {
 	}
 	
 	protected static UserDefinedRamlType convertType(TypeDeclaration typeDeclaration) {
-		if (extendsScalarType(typeDeclaration)) {
-			UserDefinedScalarTypeFactory scalarTypeFactory = new UserDefinedScalarTypeFactory();
-			return scalarTypeFactory.create(typeDeclaration);
+		if (RamlTypeIntrospector.isScalarType(typeDeclaration)) {
+			return new UserDefinedScalarTypeFactory().create(typeDeclaration);
 		}
-		if (isArrayType(typeDeclaration)) {
-			UserDefinedArrayTypeFactory arrayTypeFactory = new UserDefinedArrayTypeFactory();
-			return arrayTypeFactory.create(typeDeclaration);
-		}
-		if (isObjectType(typeDeclaration)) {
-			UserDefinedObjectTypeFactory objectTypeFactory = new UserDefinedObjectTypeFactory();
-			return objectTypeFactory.create(typeDeclaration);
+		if (RamlTypeIntrospector.isObjectType(typeDeclaration)) {
+			return new UserDefinedObjectTypeFactory().create(typeDeclaration);
 		}
 		return null;
-	}
-	
-	protected static boolean isScalarType(TypeDeclaration typeDeclaration) {
-		RamlType builtInType = BuiltInRamlType.getType(typeDeclaration.type());
-		return Objects.nonNull(builtInType) && builtInType.isScalar();
-	}
-	
-	protected static boolean extendsScalarType(TypeDeclaration typeDeclaration) {
-		RamlType builtInType = BuiltInRamlType.getType(typeDeclaration.type());
-		return Objects.nonNull(builtInType) && builtInType.isScalar();
-	}
-	
-	protected static boolean isArrayType(TypeDeclaration typeDeclaration) {
-		if (typeDeclaration.name().contains("[") && typeDeclaration.name().contains("]")) {
-			return true;
-		}
-		RamlType builtInType = BuiltInRamlType.getType(typeDeclaration.type());
-		return Objects.nonNull(builtInType) && builtInType.isArray();
-	}
-	
-	protected static boolean isObjectType(TypeDeclaration typeDeclaration) {
-		RamlType builtInType = BuiltInRamlType.getType(typeDeclaration.type());
-		return Objects.isNull(builtInType) || Objects.nonNull(builtInType) && builtInType.isObject();
 	}
 	
 	protected static void resolveTypeReferences(RamlTypeModel typeModel) {
@@ -87,8 +56,8 @@ public class RamlTypeFactory {
 			.map(t -> (UserDefinedObjectType) t)
 			.forEach(t -> t.getProperties().stream()
 							.filter(p -> p.getType().isReference())
-							.map(p -> (RamlTypeReference) p.getType())
-							.forEach(r -> r.setReferencedType(typeModel.getType(r.getTypeName())))
+							.map(p -> (RamlReferenceType) p.getType())
+							.forEach(r -> r.setReferencedType(typeModel.getType(r.getReferencedTypeName())))
 					);
 	}
 	

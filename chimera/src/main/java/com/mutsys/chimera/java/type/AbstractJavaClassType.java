@@ -6,7 +6,7 @@ import java.util.List;
 public abstract class AbstractJavaClassType extends AbstractUserDefinedJavaType implements JavaClass {
 
 	private JavaClass superClass;
-	private List<JavaInterface> implementedInterfaces = new ArrayList<>();
+	private List<JavaTypeReference> implementedInterfaces = new ArrayList<>();
 	
 	protected AbstractJavaClassType(JavaClassType javaClassType) {
 		super(javaClassType);
@@ -23,12 +23,12 @@ public abstract class AbstractJavaClassType extends AbstractUserDefinedJavaType 
 	}
 
 	@Override
-	public List<JavaInterface> getImplementedInterfaces() {
+	public List<JavaTypeReference> getImplementedInterfaces() {
 		return implementedInterfaces;
 	}
 
 	@Override
-	public void addImplementedInterface(JavaInterface javaInterface) {
+	public void addImplementedInterface(JavaTypeReference javaInterface) {
 		implementedInterfaces.add(javaInterface);
 	}
 

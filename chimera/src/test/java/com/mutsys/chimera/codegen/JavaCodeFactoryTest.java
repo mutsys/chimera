@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
+import com.mutsys.chimera.codegen.compile.GeneratedCodeJavaCompiler;
 import com.mutsys.chimera.java.JavaTypeModel;
 import com.mutsys.chimera.java.JavaTypeModelFactory;
 import com.mutsys.chimera.raml.RamlTypeModel;
@@ -19,7 +20,7 @@ import com.mutsys.chimera.raml.RamlTypeModelFactory;
 public class JavaCodeFactoryTest {
 	
 	@Test
-	public void shouldGenerateJavaClassFromJavaTypeModel() throws Exception {
+	public void shouldGenerateJavaFromExampleOne() throws Exception {
 		
 		RamlTypeModel ramlTypeModel = RamlTypeModelFactory.createRamlApi("com/mutsys/chimera/raml/raml-example-one.raml");
 		
@@ -27,7 +28,10 @@ public class JavaCodeFactoryTest {
 		
 		JavaCodeFactory.generateJavaCode(javaTypeModel, "target/generated/java");
 		
-		Class<?> generatedClass = Class.forName("com.mutsys.foo.Product");
+		GeneratedCodeJavaCompiler compiler = new GeneratedCodeJavaCompiler("target/generated/java");
+		ClassLoader generatedCodeClassLoader = compiler.compileGeneratedSource();
+		
+		Class<?> generatedClass = generatedCodeClassLoader.loadClass("com.mutsys.exampleOne.Product");
 		
 		assertThat(generatedClass, is(not(nullValue())));
 		assertThat(generatedClass.isInterface(), is(equalTo(true)));
@@ -48,7 +52,38 @@ public class JavaCodeFactoryTest {
 		
 		assertThat(setProductId, is(not(nullValue())));
 		
+	}
+	
+	@Test
+	public void shouldGenerateJavaFromExampleTwo() throws Exception {
 		
+		RamlTypeModel ramlTypeModel = RamlTypeModelFactory.createRamlApi("com/mutsys/chimera/raml/raml-example-two.raml");
+		
+		JavaTypeModel javaTypeModel = JavaTypeModelFactory.create(ramlTypeModel);
+		
+		JavaCodeFactory.generateJavaCode(javaTypeModel, "target/generated/java");
+		
+		GeneratedCodeJavaCompiler compiler = new GeneratedCodeJavaCompiler("target/generated/java");
+		ClassLoader generatedCodeClassLoader = compiler.compileGeneratedSource();
+		
+		Class<?> personClass = generatedCodeClassLoader.loadClass("com.mutsys.exampleTwo.Person");
+		
+		assertThat(personClass, is(not(nullValue())));
+		assertThat(personClass.isInterface(), is(equalTo(true)));
+		
+		Method getName = personClass.getMethod("getName");
+		
+		assertThat(getName, is(not(nullValue())));
+		
+		Method setName = personClass.getMethod("setName", String.class);
+		
+		assertThat(setName, is(not(nullValue())));
+		
+		Class<?> managerClass = generatedCodeClassLoader.loadClass("com.mutsys.exampleTwo.Manager");
+		
+		assertThat(managerClass, is(not(nullValue())));
+		assertThat(managerClass.isInterface(), is(equalTo(true)));
+		assertThat(personClass.isAssignableFrom(managerClass), is(equalTo(true)));
 		
 	}
 

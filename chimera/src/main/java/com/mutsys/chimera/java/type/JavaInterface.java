@@ -5,17 +5,17 @@ import java.util.List;
 
 public class JavaInterface extends AbstractUserDefinedJavaType {
 
-	private List<JavaInterface> extendedInterfaces = new ArrayList<>();
+	private List<JavaTypeReference> extendedInterfaces = new ArrayList<>();
 	
 	public JavaInterface() {
 		super(JavaClassType.INTERFACE);
 	}
 	
-	public List<JavaInterface> getExtendedInterfaces() {
+	public List<JavaTypeReference> getExtendedInterfaces() {
 		return extendedInterfaces;
 	}
 	
-	public void addExtendedInterface(JavaInterface javaInterface) {
+	public void addExtendedInterface(JavaTypeReference javaInterface) {
 		extendedInterfaces.add(javaInterface);
 	}
 

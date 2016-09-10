@@ -1,7 +1,7 @@
 package com.mutsys.chimera.raml.type;
 
-public class RamlTypeReference implements RamlReferenceType {
-	
+public class RamlArrayType implements RamlReferenceType {
+
 	private String referencedTypeName;
 	private RamlTypeDefinition referencedType;
 	
@@ -9,7 +9,7 @@ public class RamlTypeReference implements RamlReferenceType {
 	public String getTypeName() {
 		return referencedTypeName;
 	}
-
+	
 	@Override
 	public String getReferencedTypeName() {
 		return referencedTypeName;
@@ -31,31 +31,6 @@ public class RamlTypeReference implements RamlReferenceType {
 	}
 
 	@Override
-	public RamlTypeFamily getTypeFamily() {
-		return referencedType.getTypeFamily();
-	}
-
-	@Override
-	public boolean isBuiltInType() {
-		return referencedType.isBuiltInType();
-	}
-
-	@Override
-	public boolean isScalar() {
-		return referencedType.isScalar();
-	}
-
-	@Override
-	public boolean isObject() {
-		return referencedType.isObject();
-	}
-
-	@Override
-	public boolean isArray() {
-		return referencedType.isArray();
-	}
-
-	@Override
 	public boolean isReference() {
 		return true;
 	}
@@ -65,4 +40,29 @@ public class RamlTypeReference implements RamlReferenceType {
 		return false;
 	}
 
+	@Override
+	public RamlTypeFamily getTypeFamily() {
+		return RamlTypeFamily.ARRAY;
+	}
+
+	@Override
+	public boolean isBuiltInType() {
+		return false;
+	}
+
+	@Override
+	public boolean isScalar() {
+		return false;
+	}
+
+	@Override
+	public boolean isObject() {
+		return false;
+	}
+
+	@Override
+	public boolean isArray() {
+		return true;
+	}
+	
 }
