@@ -7,7 +7,7 @@ public class JavaTypeReference extends AbstractJavaType {
 	
 	@Override
 	public boolean isUserDefined() {
-		return true;
+		return false;
 	}
 
 	@Override

@@ -8,10 +8,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.mutsys.chimera.raml.GeneratedJavaType;
 import com.mutsys.chimera.raml.resource.method.RamlResourceMethod;
 
-public class RamlResource {
+public class RamlResource implements GeneratedJavaType {
 
+	private String javaClassType;
+	private String javaClassName;
+	private String javaPackageName;
+	
 	private String name;
 	private String relativePath;
 	private RamlResource parentResource;
@@ -96,6 +101,36 @@ public class RamlResource {
 	
 	public void addPathParameter(RamlResourceParameter pathParameter) {
 		pathParameters.put(pathParameter.getName(), pathParameter);
+	}
+
+	@Override
+	public String getJavaClassType() {
+		return javaClassType;
+	}
+
+	@Override
+	public void setJavaClassType(String javaClassType) {
+		this.javaClassType = javaClassType;
+	}
+
+	@Override
+	public String getJavaClassName() {
+		return javaClassName;
+	}
+
+	@Override
+	public void setJavaClassName(String javaClassName) {
+		this.javaClassName = javaClassName;
+	}
+
+	@Override
+	public String getJavaPackageName() {
+		return javaPackageName;
+	}
+
+	@Override
+	public void setJavaPackageName(String javaPackageName) {
+		this.javaPackageName = javaPackageName;
 	}
 	
 }

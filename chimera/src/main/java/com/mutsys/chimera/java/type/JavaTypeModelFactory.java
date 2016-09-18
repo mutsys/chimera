@@ -1,4 +1,4 @@
-package com.mutsys.chimera.java;
+package com.mutsys.chimera.java.type;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,21 +7,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.mutsys.chimera.java.pakkage.JavaPackage;
-import com.mutsys.chimera.java.type.JavaClassType;
-import com.mutsys.chimera.java.type.JavaInterface;
-import com.mutsys.chimera.java.type.JavaProperty;
-import com.mutsys.chimera.java.type.JavaPropertyCardinality;
-import com.mutsys.chimera.java.type.JavaTypeReference;
-import com.mutsys.chimera.java.type.ProvidedJavaType;
-import com.mutsys.chimera.java.type.RamlJavaType;
+import com.mutsys.chimera.raml.resource.RamlResourceModel;
 import com.mutsys.chimera.raml.type.BuiltInRamlType;
+import com.mutsys.chimera.raml.type.RamlArrayType;
 import com.mutsys.chimera.raml.type.RamlType;
 import com.mutsys.chimera.raml.type.RamlTypeDefinition;
 import com.mutsys.chimera.raml.type.RamlTypeModel;
 import com.mutsys.chimera.raml.type.RamlTypeReference;
-import com.mutsys.chimera.raml.type.RamlArrayType;
 import com.mutsys.chimera.raml.type.user.RamlUserTypeProperty;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
@@ -35,11 +30,36 @@ public class JavaTypeModelFactory {
 		return javaTypeModel;
 	}
 	
+	public static JavaTypeModel create(RamlTypeModel ramlTypeModel, RamlResourceModel ramlResourceModel) {
+		JavaTypeModel javaTypeModel = new JavaTypeModel();
+		createPackages(javaTypeModel, ramlTypeModel, ramlResourceModel);
+		createJavaTypes(javaTypeModel, ramlTypeModel);
+		return javaTypeModel;
+	}
+	
+	protected static Stream<String> getPackageNames(RamlTypeModel ramlTypeModel) {
+		return ramlTypeModel.getTypes(false).stream()
+				.filter(t -> t.isDefinition())
+				.map(t -> (UserDefinedRamlType) t)
+				.map(t -> t.getJavaPackageName());
+	}
+	
+	protected static Stream<String> getPackageNames(RamlResourceModel ramlResourceModel) {
+		return ramlResourceModel.getResources().stream()
+				.filter(r -> r.isRootResource())
+				.map(r -> r.getJavaPackageName());
+	}
+	
 	protected static void createPackages(JavaTypeModel javaTypeModel, RamlTypeModel ramlTypeModel) {
-		ramlTypeModel.getTypes(false).stream()
-			.filter(t -> t.isDefinition())
-			.map(t -> (UserDefinedRamlType) t)
-			.map(t -> t.getJavaPackageName())
+		createPackages(javaTypeModel, getPackageNames(ramlTypeModel));
+	}
+	
+	protected static void createPackages(JavaTypeModel javaTypeModel, RamlTypeModel ramlTypeModel, RamlResourceModel ramlResourceModel) {
+		createPackages(javaTypeModel, Stream.concat(getPackageNames(ramlTypeModel), getPackageNames(ramlResourceModel)));		
+	}
+	
+	protected static void createPackages(JavaTypeModel javaTypeModel, Stream<String> packageNames) {
+		packageNames
 			.distinct()
 			.map(p -> p.split("\\."))
 			.flatMap(p ->

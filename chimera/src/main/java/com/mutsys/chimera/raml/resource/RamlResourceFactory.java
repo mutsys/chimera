@@ -27,15 +27,33 @@ public class RamlResourceFactory {
 		}
 		return resourceModel;
 	}
-	
+		
 	protected static List<RamlResource> collectResources(RamlResource parentRamlResource, List<Resource> resources) {
 		List<RamlResource> ramlResources = new ArrayList<>();
 		for (Resource resource : resources) {
 			RamlResource ramlResource = convertResource(parentRamlResource, resource);
+			collectCodeGenAttributes(ramlResource, resource);
 			ramlResources.add(ramlResource);
 			ramlResources.addAll(collectSubResources(new ArrayList<>(), ramlResource));
 		}
 		return ramlResources;
+	}
+	
+	protected static void collectCodeGenAttributes(RamlResource ramlResource, Resource resource) {
+		if (!ramlResource.isRootResource()) {
+			return;
+		}
+		ramlResource.setJavaClassType(getAnnotation(resource, "javaClassType"));
+		ramlResource.setJavaClassName(getAnnotation(resource, "javaClassName"));
+		ramlResource.setJavaPackageName(getAnnotation(resource, "javaPackageName"));
+	}
+	
+	protected static String getAnnotation(Resource resource, String annotationName) {
+		return resource.annotations().stream()
+			.filter(a -> a.annotation().name().equals(annotationName))
+			.findFirst()
+			.map(a -> a.structuredValue().value().toString())
+			.orElse("");
 	}
 	
 	protected static List<RamlResource> collectSubResources(List<RamlResource> subResources, RamlResource ramlResource) {

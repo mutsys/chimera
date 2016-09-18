@@ -33,12 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mutsys.chimera.java.JavaTypeModel;
 import com.mutsys.chimera.java.pakkage.JavaPackage;
 import com.mutsys.chimera.java.type.JavaClass;
 import com.mutsys.chimera.java.type.JavaInterface;
 import com.mutsys.chimera.java.type.JavaProperty;
 import com.mutsys.chimera.java.type.JavaPropertyCardinality;
+import com.mutsys.chimera.java.type.JavaTypeModel;
 import com.mutsys.chimera.java.type.JavaTypeReference;
 import com.mutsys.chimera.java.type.RamlJavaType;
 import com.mutsys.chimera.java.type.UserDefinedJavaType;

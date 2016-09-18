@@ -5,12 +5,12 @@ usage: |
 
 annotationTypes:
   javaClassType:
-    allowedTargets: TypeDeclaration
+    allowedTargets: [ TypeDeclaration, Resource ]
     type: string
     enum: ['interface','abstractClass','concreteClass']
   javaClassName:
-    allowedTargets: TypeDeclaration
+    allowedTargets: [ TypeDeclaration, Resource ]
     type: string
   javaPackageName:
-    allowedTargets: TypeDeclaration
+    allowedTargets: [ TypeDeclaration, Resource ]
     type: string

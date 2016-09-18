@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RamlResourceModel {
+public class RamlResourceModel implements RamlResourceProvider {
 	
 	private final Map<String,RamlResource> resourceMap = new HashMap<>();
 	

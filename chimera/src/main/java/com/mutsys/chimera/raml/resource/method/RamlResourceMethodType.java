@@ -1,29 +1,55 @@
 package com.mutsys.chimera.raml.resource.method;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum RamlResourceMethodType {
 	
-	GET    ("get",    false),
-	POST   ("post",   true),
-	PUT    ("put",    true),
-	DELETE ("delete", false);
+	GET    ("get",    0, "get", false),
+	POST   ("post",   1, "create", true),
+	PUT    ("put",    2, "update", true),
+	DELETE ("delete", 3, "delete", false);
 	
 	private static final Map<String,RamlResourceMethodType> methodMap = Arrays.stream(values()).collect(Collectors.toMap(m -> m.getMethodName(), Function.identity()));
 	
-	private boolean requestHasBody;
-	private String methodName;
+	private static final Comparator<RamlResourceMethodType> methodTypeComparator = new Comparator<RamlResourceMethodType>() {
+
+		@Override
+		public int compare(RamlResourceMethodType mt1, RamlResourceMethodType mt2) {
+			return Integer.compare(mt1.getOrdinal(), mt2.getOrdinal());
+		}
+		
+	};
 	
-	private RamlResourceMethodType(String methodName, boolean requestHasBody) {
+	private static final List<RamlResourceMethodType> orderedMethodTypes = Arrays.stream(values()).sorted(methodTypeComparator).collect(Collectors.toList());
+	
+	private String methodName;
+	private int ordinal;
+	private String prefix;
+	private boolean requestHasBody;
+	
+	
+	private RamlResourceMethodType(String methodName, int ordinal, String prefix, boolean requestHasBody) {
 		this.methodName = methodName;
+		this.ordinal = ordinal;
+		this.prefix = prefix;
 		this.requestHasBody = requestHasBody;
 	}
 	
 	public String getMethodName() {
 		return methodName;
+	}
+	
+	public int getOrdinal() {
+		return ordinal;
+	}
+	
+	public String getPrefix() {
+		return prefix;
 	}
 	
 	public boolean requestHasBody() {
@@ -32,6 +58,10 @@ public enum RamlResourceMethodType {
 	
 	public static RamlResourceMethodType getMethodType(String methodName) {
 		return methodMap.get(methodName);
+	}
+	
+	public List<RamlResourceMethodType> getMethodTypes() {
+		return orderedMethodTypes;
 	}
 
 }

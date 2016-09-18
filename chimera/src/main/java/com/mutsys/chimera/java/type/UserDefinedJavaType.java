@@ -2,23 +2,15 @@ package com.mutsys.chimera.java.type;
 
 import java.util.List;
 
-import com.mutsys.chimera.java.pakkage.JavaPackage;
+import com.mutsys.chimera.java.GeneratedJavaType;
 
-public interface UserDefinedJavaType extends RamlJavaType {
-	
-	JavaClassType getJavaClassType();
+public interface UserDefinedJavaType extends GeneratedJavaType {
 	
 	public boolean isInterface();
 	
 	public boolean isAbstractClass();
 	
 	public boolean isConcreteClass();
-	
-	JavaPackage getPackage();
-	
-	void setPackage(JavaPackage pakkage);
-	
-	void setName(String name);
 	
 	List<JavaProperty> getProperties();
 	

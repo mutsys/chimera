@@ -1,4 +1,4 @@
-package com.mutsys.chimera.java;
+package com.mutsys.chimera.java.type;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -15,6 +15,8 @@ import com.mutsys.chimera.java.pakkage.JavaPackage;
 import com.mutsys.chimera.java.type.JavaInterface;
 import com.mutsys.chimera.java.type.JavaProperty;
 import com.mutsys.chimera.java.type.JavaPropertyCardinality;
+import com.mutsys.chimera.java.type.JavaTypeModel;
+import com.mutsys.chimera.java.type.JavaTypeModelFactory;
 import com.mutsys.chimera.java.type.ProvidedJavaType;
 import com.mutsys.chimera.java.type.UserDefinedJavaType;
 import com.mutsys.chimera.raml.type.RamlTypeModel;
