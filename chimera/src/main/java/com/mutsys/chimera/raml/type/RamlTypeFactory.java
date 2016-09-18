@@ -8,7 +8,6 @@ import org.raml.v2.api.model.v10.api.Library;
 import org.raml.v2.api.model.v10.api.LibraryBase;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 
-import com.mutsys.chimera.raml.RamlTypeModel;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectTypeFactory;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;

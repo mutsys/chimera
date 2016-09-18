@@ -1,7 +1,7 @@
 package com.mutsys.chimera.raml.type.user;
 
-import com.mutsys.chimera.raml.RamlTypeModel;
 import com.mutsys.chimera.raml.type.RamlTypeFamily;
+import com.mutsys.chimera.raml.type.RamlTypeModel;
 
 public abstract class AbstractUserDefinedRamlType implements UserDefinedRamlType {
 

@@ -1,4 +1,4 @@
-package com.mutsys.chimera.raml;
+package com.mutsys.chimera.raml.type;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -12,6 +12,8 @@ import static org.hamcrest.Matchers.nullValue;
 import org.junit.Test;
 
 import com.mutsys.chimera.raml.type.RamlType;
+import com.mutsys.chimera.raml.type.RamlTypeModel;
+import com.mutsys.chimera.raml.type.RamlTypeModelFactory;
 import com.mutsys.chimera.raml.type.RamlArrayType;
 import com.mutsys.chimera.raml.type.user.RamlUserTypeProperty;
 import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;

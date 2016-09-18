@@ -1,4 +1,4 @@
-package com.mutsys.chimera.raml;
+package com.mutsys.chimera.raml.resource;
 
 import org.raml.v2.api.RamlModelBuilder;
 import org.raml.v2.api.RamlModelResult;
@@ -8,13 +8,11 @@ import org.raml.v2.api.model.v10.api.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mutsys.chimera.raml.type.RamlTypeFactory;
-
-public class RamlTypeModelFactory {
+public class RamlResourceModelFactory {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(RamlTypeModelFactory.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RamlResourceModelFactory.class);
 	
-	public static RamlTypeModel createRamlApi(String resourceLocation) {
+	public static RamlResourceModel createRamlApi(String resourceLocation) {
 		RamlModelBuilder ramlModelBuilder = new RamlModelBuilder(new ClassPathResourceLoader());
 		RamlModelResult ramlModelResult = ramlModelBuilder.buildApi(resourceLocation);
 		if (ramlModelResult.hasErrors()) {
@@ -23,11 +21,11 @@ public class RamlTypeModelFactory {
 				LOG.error(validationResult.getMessage());
 			}
 		}
-		return createTypes(ramlModelResult.getApiV10());
+		return createResources(ramlModelResult.getApiV10());
 	}
 	
-	protected static RamlTypeModel createTypes(Api api) {
-		return RamlTypeFactory.getTypes(api);
+	protected static RamlResourceModel createResources(Api api) {
+		return RamlResourceFactory.getResources(api);
 	}
 
 }

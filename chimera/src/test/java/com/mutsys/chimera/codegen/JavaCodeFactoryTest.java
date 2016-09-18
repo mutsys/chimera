@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.mutsys.chimera.codegen.compile.GeneratedCodeJavaCompiler;
 import com.mutsys.chimera.java.JavaTypeModel;
 import com.mutsys.chimera.java.JavaTypeModelFactory;
-import com.mutsys.chimera.raml.RamlTypeModel;
-import com.mutsys.chimera.raml.RamlTypeModelFactory;
+import com.mutsys.chimera.raml.type.RamlTypeModel;
+import com.mutsys.chimera.raml.type.RamlTypeModelFactory;
 
 
 public class JavaCodeFactoryTest {

@@ -1,4 +1,4 @@
-package com.mutsys.chimera.raml;
+package com.mutsys.chimera.raml.type;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,8 +9,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.mutsys.chimera.raml.type.BuiltInRamlType;
-import com.mutsys.chimera.raml.type.RamlTypeDefinition;
 import com.mutsys.chimera.raml.type.user.UserDefinedRamlType;
 
 public class RamlTypeModel {

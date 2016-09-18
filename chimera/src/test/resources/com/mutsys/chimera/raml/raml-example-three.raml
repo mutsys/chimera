@@ -1,0 +1,50 @@
+#%RAML 1.0
+title: RAML example 3
+
+types:
+  foo:
+    type: object
+    properties:
+      code:
+        type: string
+      name:
+        type: string
+
+/things:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: foo[]
+  post:
+    body:
+      application/json:
+        type: foo
+    responses:
+      201:
+        body:
+          application/json:
+            type: foo
+  /{code}:
+    uriParameters:
+      code:
+        type: string
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: foo
+    put:
+      body:
+        application/json:
+          type: foo
+      responses:
+        200:
+          body:
+            application/json:
+              type: foo
+    delete:
+      responses:
+        204:

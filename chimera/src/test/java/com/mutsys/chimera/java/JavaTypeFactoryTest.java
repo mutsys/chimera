@@ -17,8 +17,8 @@ import com.mutsys.chimera.java.type.JavaProperty;
 import com.mutsys.chimera.java.type.JavaPropertyCardinality;
 import com.mutsys.chimera.java.type.ProvidedJavaType;
 import com.mutsys.chimera.java.type.UserDefinedJavaType;
-import com.mutsys.chimera.raml.RamlTypeModel;
-import com.mutsys.chimera.raml.RamlTypeModelFactory;
+import com.mutsys.chimera.raml.type.RamlTypeModel;
+import com.mutsys.chimera.raml.type.RamlTypeModelFactory;
 
 public class JavaTypeFactoryTest {
 	
