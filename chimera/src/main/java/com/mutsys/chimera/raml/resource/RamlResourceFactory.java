@@ -32,9 +32,12 @@ public class RamlResourceFactory {
 		List<RamlResource> ramlResources = new ArrayList<>();
 		for (Resource resource : resources) {
 			RamlResource ramlResource = convertResource(parentRamlResource, resource);
-			collectCodeGenAttributes(ramlResource, resource);
+			if (parentRamlResource == null) {
+				collectCodeGenAttributes(ramlResource, resource);
+			}
 			ramlResources.add(ramlResource);
-			ramlResources.addAll(collectSubResources(new ArrayList<>(), ramlResource));
+			collectResources(ramlResource, resource.resources());
+			
 		}
 		return ramlResources;
 	}
@@ -53,15 +56,7 @@ public class RamlResourceFactory {
 			.filter(a -> a.annotation().name().equals(annotationName))
 			.findFirst()
 			.map(a -> a.structuredValue().value().toString())
-			.orElse("");
-	}
-	
-	protected static List<RamlResource> collectSubResources(List<RamlResource> subResources, RamlResource ramlResource) {
-		for (RamlResource subResource : ramlResource.getSubResources()) {
-			subResources.add(subResource);
-			return collectSubResources(subResources, subResource);
-		}
-		return subResources;
+			.orElse(null);
 	}
 	
 	protected static RamlResource convertResource(RamlResource parentRamlResource, Resource resource) {

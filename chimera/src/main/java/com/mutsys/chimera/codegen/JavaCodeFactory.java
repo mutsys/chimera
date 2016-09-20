@@ -17,15 +17,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.JavaCore;
 import org.jboss.forge.roaster.Roaster;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.JavaCore;
 import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.jboss.forge.roaster.model.JavaType;
+import org.jboss.forge.roaster.model.impl.MethodImpl;
+import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.Importer;
 import org.jboss.forge.roaster.model.source.InterfaceCapableSource;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 import org.jboss.forge.roaster.model.source.JavaSource;
+import org.jboss.forge.roaster.model.source.MethodSource;
+import org.jboss.forge.roaster.model.source.ParameterSource;
 import org.jboss.forge.roaster.model.source.PropertyHolderSource;
 import org.jboss.forge.roaster.model.source.PropertySource;
 import org.jboss.forge.roaster.model.util.Formatter;
@@ -33,7 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mutsys.chimera.java.JavaModel;
 import com.mutsys.chimera.java.pakkage.JavaPackage;
+import com.mutsys.chimera.java.resource.JavaResourceMethod;
+import com.mutsys.chimera.java.resource.JavaResourceMethodArgument;
+import com.mutsys.chimera.java.resource.JavaResourceModel;
 import com.mutsys.chimera.java.type.JavaClass;
 import com.mutsys.chimera.java.type.JavaInterface;
 import com.mutsys.chimera.java.type.JavaProperty;
@@ -50,6 +58,13 @@ public class JavaCodeFactory {
 	public static void generateJavaCode(JavaTypeModel typeModel, String destDir) {
 		Map<String,JavaSource<?>> generatedJavaTypeMap = new HashMap<>();
 		createClasses(generatedJavaTypeMap, typeModel);
+		writeGeneratedCode(generatedJavaTypeMap, destDir);
+	}
+	
+	public static void generateJavaCode(JavaModel javaModel, String destDir) {
+		Map<String,JavaSource<?>> generatedJavaTypeMap = new HashMap<>();
+		createClasses(generatedJavaTypeMap, javaModel.getTypeModel());
+		createResources(generatedJavaTypeMap, javaModel.getResourceModel());
 		writeGeneratedCode(generatedJavaTypeMap, destDir);
 	}
 	
@@ -129,6 +144,80 @@ public class JavaCodeFactory {
 		
 	}
 	
+	protected static void createResources(Map<String,JavaSource<?>> generatedJavaTypeMap, JavaResourceModel resourceModel) {
+		String resourceClassName = resourceModel.getName();
+		String resourcePackageName = resourceModel.getPackageName();
+		JavaInterfaceSource resourceClass = Roaster.create(JavaInterfaceSource.class);
+		resourceClass.setPublic().setPackage(resourcePackageName).setName(resourceClassName);
+		AnnotationSource<?> path = resourceClass.addAnnotation();
+		path.setName(JAX_RS_PATH);
+		path.setStringValue(resourceModel.getResourcePath());
+		String resourceClassCanonicalName = resourceModel.getCanonicalName();
+		generatedJavaTypeMap.put(resourceClassCanonicalName, resourceClass);
+		addImport(resourceClass, JAX_RS_CORE_PACKAGE, JAX_RS_RESPONSE);
+		addImport(resourceClass, JAX_RS_PACKAGE, JAX_RS_PATH);
+		populateResourceMethods(resourceClass, resourceModel);
+	}
+	
+	protected static void populateResourceMethods(JavaInterfaceSource resourceClass, JavaResourceModel resourceModel) {
+		for (JavaResourceMethod resourceMethod : resourceModel.getResourceMethods()) {
+			MethodSource<?> resourceMethodSource = createResourceMethod(resourceClass, resourceMethod);
+			resourceClass.addMethod(resourceMethodSource);
+		}
+		for (JavaResourceModel subResourceModel : resourceModel.getSubResources()) {
+			populateResourceMethods(resourceClass, subResourceModel);
+		}
+	}
+	
+	private final static String JAX_RS_PACKAGE = "javax.ws.rs";
+	private final static String JAX_RS_CORE_PACKAGE = "javax.ws.rs.core";
+	
+	private final static String JAX_RS_RESPONSE = "Response";
+	private final static String JAX_RS_CONSUMES = "Consumes";
+	private final static String JAX_RS_PRODUCES = "Produces";
+	private final static String JAX_RS_PATH = "Path";
+	private final static String JAX_RS_PATH_PARAM = "PathParam";
+	
+	protected static MethodSource<?> createResourceMethod(JavaInterfaceSource resourceClass, JavaResourceMethod resourceMethod) {
+		MethodImpl<JavaInterfaceSource> methodSource = new MethodImpl<>(resourceClass);
+		methodSource.setName(resourceMethod.getName());
+		methodSource.setReturnType(JAX_RS_RESPONSE);
+		String httpMethodAnnotation = resourceMethod.getHttpMethod();
+		methodSource.addAnnotation(httpMethodAnnotation);
+		addImport(resourceClass, JAX_RS_PACKAGE, httpMethodAnnotation);
+		JavaResourceModel methodResource = resourceMethod.getResource();
+		if (!methodResource.isRootResource()) {
+			AnnotationSource<?> path = methodSource.addAnnotation();
+			path.setName(JAX_RS_PATH);
+			path.setStringValue(methodResource.getResourcePath());
+		}
+		resourceMethod.getConsumesMediaType().ifPresent(mt -> {
+			addImport(resourceClass, JAX_RS_PACKAGE, JAX_RS_CONSUMES);
+			AnnotationSource<?> consumes = methodSource.addAnnotation();
+			consumes.setName(JAX_RS_CONSUMES);
+			consumes.setStringValue(mt);
+		});
+		resourceMethod.getProducesMediaType().ifPresent(mt -> {
+			addImport(resourceClass, JAX_RS_PACKAGE, JAX_RS_PRODUCES);
+			AnnotationSource<?> produces = methodSource.addAnnotation();
+			produces.setName(JAX_RS_PRODUCES);
+			produces.setStringValue(mt);
+		});
+		for (JavaResourceMethodArgument argument : resourceMethod.getArguments()) {
+			String argumentType = argument.getArgumentJavaType().getName();
+			String argumentName = argument.getArgumentName();
+			ParameterSource<?> parameterSource = methodSource.addParameter(argumentType, argumentName);
+			addImport(resourceClass, argument.getArgumentJavaType().getCanonicalName());
+			if (argument.isPathParameter()) {
+				addImport(resourceClass, JAX_RS_PACKAGE, JAX_RS_PATH_PARAM);
+				AnnotationSource<?> pathParam = parameterSource.addAnnotation();
+				pathParam.setName(JAX_RS_PATH_PARAM);
+				pathParam.setStringValue(argumentName);
+			}
+		}
+		return methodSource;
+	}
+	
 	protected static void createClasses(Map<String,JavaSource<?>> generatedJavaTypeMap, JavaTypeModel typeModel) {
 		List<UserDefinedJavaType> javaTypes =
 			new JavaTypeModelVisitor<UserDefinedJavaType>() {
@@ -189,13 +278,9 @@ public class JavaCodeFactory {
 		for (JavaProperty property : userDefinedJavaType.getProperties()) {
 			RamlJavaType propertyType = property.getJavaType();
 			String className = propertyType.getCanonicalName();
-			if (importer.requiresImport(className) && !importer.hasImport(className)) {
-				importer.addImport(className);
-			}
+			addImport(importer, className);
 			if (property.getCardinality().equals(JavaPropertyCardinality.LIST)) {
-				if (importer.requiresImport(LIST_CLASS_NAME) && !importer.hasImport(LIST_CLASS_NAME)) {
-					importer.addImport(LIST_CLASS_NAME);
-				}
+				addImport(importer, LIST_CLASS_NAME);
 			}
 		}
 	}
@@ -237,6 +322,17 @@ public class JavaCodeFactory {
 		String userDefinedJavaTypeCanonicalName = userDefinedJavaType.getCanonicalName();
 		generatedJavaTypeMap.put(userDefinedJavaTypeCanonicalName, javaType);
 		return javaType;
+	}
+	
+	protected static void addImport(Importer<?> importer, String className) {
+		if (importer.requiresImport(className) && !importer.hasImport(className)) {
+			importer.addImport(className);
+		}
+	}
+	
+	protected static void addImport(Importer<?> importer, String packageName, String shortClassName) {
+		String className = new StringBuilder(packageName).append(".").append(shortClassName).toString();
+		addImport(importer, className);
 	}
 	
 }

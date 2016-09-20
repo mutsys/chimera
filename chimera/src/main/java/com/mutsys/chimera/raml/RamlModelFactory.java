@@ -44,23 +44,30 @@ private static final Logger LOG = LoggerFactory.getLogger(RamlModelFactory.class
 	
 	protected static void resolveTypeReferences(RamlTypeModel ramlTypeModel, RamlResourceModel ramlResourceModel) {
 		for (RamlResource resource : ramlResourceModel.getResources()) {
-			for (RamlResourceParameter pathParameter : resource.getPathParameters()) {
-				resolveTypeReference(ramlTypeModel, pathParameter.getRamlType());
+			resolveTypeReferences(ramlTypeModel, resource);
+		}		
+	}
+	
+	protected static void resolveTypeReferences(RamlTypeModel ramlTypeModel, RamlResource resource) {
+		for (RamlResourceParameter pathParameter : resource.getPathParameters()) {
+			resolveTypeReference(ramlTypeModel, pathParameter.getRamlType());
+		}
+		for (RamlResourceMethod method : resource.getMethods()) {
+			method.getRequestBody().ifPresent(b -> {
+				resolveTypeReference(ramlTypeModel, b.getBodyType());
+			});
+			for (RamlResourceParameter queryParameter : method.getQueryParameters()) {
+				resolveTypeReference(ramlTypeModel, queryParameter.getRamlType());
 			}
-			for (RamlResourceMethod method : resource.getMethods()) {
-				method.getRequestBody().ifPresent(b -> {
+			for (RamlResourceMethodResponse response : method.getResponses()) {
+				response.getBody().ifPresent(b -> {
 					resolveTypeReference(ramlTypeModel, b.getBodyType());
 				});
-				for (RamlResourceParameter queryParameter : method.getQueryParameters()) {
-					resolveTypeReference(ramlTypeModel, queryParameter.getRamlType());
-				}
-				for (RamlResourceMethodResponse response : method.getResponses()) {
-					response.getBody().ifPresent(b -> {
-						resolveTypeReference(ramlTypeModel, b.getBodyType());
-					});
-				}
 			}
-		}		
+		}
+		for (RamlResource ramlSubResource : resource.getSubResources()) {
+			resolveTypeReferences(ramlTypeModel, ramlSubResource);
+		}
 	}
 	
 	protected static void resolveTypeReference(RamlTypeModel ramlTypeModel, RamlType ramlType) {

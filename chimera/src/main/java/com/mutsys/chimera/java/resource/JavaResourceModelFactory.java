@@ -21,11 +21,8 @@ import com.mutsys.chimera.raml.type.user.UserDefinedObjectType;
 public class JavaResourceModelFactory {
 	
 	public static JavaResourceModel create(RamlResourceModel ramlResourceModel) {
-		JavaResourceModel javaResourceModel = new JavaResourceModel();
 		RamlResource rootResource = getRootResource(ramlResourceModel);
-		javaResourceModel.setResourcePath(rootResource.getRelativePath());
-		getResourceMethods(rootResource).forEach(javaResourceModel::addResourceMethod);
-		return javaResourceModel;
+		return convertResource(null, rootResource);
 	}
 	
 	protected static RamlResource getRootResource(RamlResourceModel ramlResourceModel) {
@@ -33,6 +30,22 @@ public class JavaResourceModelFactory {
 				.filter(r -> r.isRootResource())
 				.findFirst()
 				.orElse(null);
+	}
+	
+	protected static JavaResourceModel convertResource(JavaResourceModel parentResource, RamlResource ramlResource) {
+		JavaResourceModel javaResourceModel = new JavaResourceModel();
+		if (parentResource == null) {
+			javaResourceModel.setName(ramlResource.getJavaClassName());
+		} else {
+			javaResourceModel.setName(ramlResource.getName());
+		}
+		javaResourceModel.setResourcePath(ramlResource.getRelativePath());
+		getResourceMethods(ramlResource).forEach(javaResourceModel::addResourceMethod);
+		javaResourceModel.setParentResource(parentResource);
+		for (RamlResource ramlSubResource : ramlResource.getSubResources()) {
+			javaResourceModel.addSubResource(convertResource(javaResourceModel, ramlSubResource));
+		}
+		return javaResourceModel;
 	}
 	
 	protected static void collectCodeGenInfo(JavaResourceModel javaResourceModel, RamlResource rootResource) {
@@ -49,7 +62,6 @@ public class JavaResourceModelFactory {
 	
 	protected static JavaResourceMethod convertMethod(RamlResource resource, RamlResourceMethod method) {
 		JavaResourceMethod resourceMethod = new JavaResourceMethod();
-		resourceMethod.setResourcePath(resource.getRelativePath());
 		resourceMethod.setHttpMethod(method.getMethodType().getMethodName().toUpperCase());
 		resourceMethod.setConsumesMediaType(getRequestMediaType(method));
 		resourceMethod.setProducesMediaType(getResponseMediaType(method));
@@ -64,8 +76,10 @@ public class JavaResourceModelFactory {
 		
 		method.getRequestBody().ifPresent(b -> {
 			RequestBodyMethodArgument requestBodyArgument = new RequestBodyMethodArgument();
-			requestBodyArgument.setArgumentName("apiRequest");
-			requestBodyArgument.setArgumentJavaType(getJavaType(b.getBodyType()));
+			RamlJavaType bodyType = getJavaType(b.getBodyType());
+			String argName =  new StringBuilder(bodyType.getName().substring(0, 1).toLowerCase()).append(bodyType.getName().substring(1)).toString();
+			requestBodyArgument.setArgumentName(argName);
+			requestBodyArgument.setArgumentJavaType(bodyType);
 			resourceMethod.addArgument(requestBodyArgument);
 		});
 		
@@ -93,13 +107,22 @@ public class JavaResourceModelFactory {
 		String resourceName = rootResource.getRelativePath().substring(1);
 		StringBuilder camelCasedResourceName = new StringBuilder(resourceName.substring(0, 1).toUpperCase()).append(resourceName.substring(1));
 		boolean hasPathParams = resource.getPathParameters().size() > 0;
-		if (method.getMethodType().equals(RamlResourceMethodType.GET) && hasPathParams) {
-			camelCasedResourceName.insert(0, "One");
+		boolean isGet = method.getMethodType().equals(RamlResourceMethodType.GET);
+		boolean isCollectionMethod = isGet && !hasPathParams;
+		if (!isCollectionMethod) {
+			if (resourceName.endsWith("s")) {
+				camelCasedResourceName.delete(camelCasedResourceName.length() -1 , camelCasedResourceName.length());
+			}
 		}
-		return camelCasedResourceName.insert(0, method.getMethodType().getPrefix()).toString();
+		String prefix = isCollectionMethod ? method.getMethodType().getCollectionPrefix() : method.getMethodType().getMemberPrefix();
+		return camelCasedResourceName.insert(0, prefix).toString();
 	}
 	
 	protected static RamlJavaType getJavaType(RamlType ramlType) {
+		if (ramlType.isReference()) {
+			RamlTypeReference typeReference = (RamlTypeReference) ramlType;
+			return getJavaType(typeReference.getReferencedType());
+		}
 		if (ramlType.isBuiltInType()) {
 			BuiltInRamlType builtInType = (BuiltInRamlType) ramlType;
 			ProvidedJavaType propertyType = new ProvidedJavaType();
@@ -112,10 +135,6 @@ public class JavaResourceModelFactory {
 			propertyType.setName(typeDefinition.getJavaClassName());
 			propertyType.setPackageName(typeDefinition.getJavaPackageName());
 			return propertyType;
-		}
-		if (ramlType.isReference()) {
-			RamlTypeReference typeReference = (RamlTypeReference) ramlType;
-			return getJavaType(typeReference.getReferencedType());
 		}
 		return null;
 	}

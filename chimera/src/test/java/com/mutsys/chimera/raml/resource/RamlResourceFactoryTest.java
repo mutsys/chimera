@@ -20,7 +20,7 @@ public class RamlResourceFactoryTest {
 				
 		assertThat(ramlResourceModel, is(not(nullValue())));
 		
-		assertThat(ramlResourceModel.getResources(), hasSize(2));
+		assertThat(ramlResourceModel.getResources(), hasSize(1));
 		
 		RamlResource thingsCollection = ramlResourceModel.getResource("/things");
 		assertThat(thingsCollection, is(not(nullValue())));

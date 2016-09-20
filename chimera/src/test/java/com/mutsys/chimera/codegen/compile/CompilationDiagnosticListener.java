@@ -17,7 +17,7 @@ public class CompilationDiagnosticListener implements DiagnosticListener<JavaFil
 
 	private final Writer err = new BufferedWriter(new PrintWriter(System.err));
 	private final static String SEPARATOR = " : ";
-	private final static Set<Kind> LOGGABLE_DIAGNOSTIC_KIND = Stream.of(Kind.WARNING, Kind.MANDATORY_WARNING, Kind.ERROR).collect(Collectors.toSet());
+	private final static Set<Kind> LOGGABLE_DIAGNOSTIC_KIND = Stream.of(Kind.WARNING, Kind.MANDATORY_WARNING, Kind.ERROR, Kind.NOTE, Kind.OTHER).collect(Collectors.toSet());
 	
 	@Override
 	public void report(Diagnostic<? extends JavaFileObject> diagnostic) {

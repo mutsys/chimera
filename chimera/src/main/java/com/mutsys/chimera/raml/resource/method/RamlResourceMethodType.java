@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 
 public enum RamlResourceMethodType {
 	
-	GET    ("get",    0, "get", false),
-	POST   ("post",   1, "create", true),
-	PUT    ("put",    2, "update", true),
-	DELETE ("delete", 3, "delete", false);
+	GET    ("get",    0, "read",   "find",   false),
+	POST   ("post",   1, "create", "create", true),
+	PUT    ("put",    2, "update", "update", true),
+	DELETE ("delete", 3, "delete", "delete", false);
 	
 	private static final Map<String,RamlResourceMethodType> methodMap = Arrays.stream(values()).collect(Collectors.toMap(m -> m.getMethodName(), Function.identity()));
 	
@@ -29,14 +29,16 @@ public enum RamlResourceMethodType {
 	
 	private String methodName;
 	private int ordinal;
-	private String prefix;
+	private String memberPrefix;
+	private String collectionPrefix;
 	private boolean requestHasBody;
 	
 	
-	private RamlResourceMethodType(String methodName, int ordinal, String prefix, boolean requestHasBody) {
+	private RamlResourceMethodType(String methodName, int ordinal, String memberPrefix, String collectionPrefix, boolean requestHasBody) {
 		this.methodName = methodName;
 		this.ordinal = ordinal;
-		this.prefix = prefix;
+		this.memberPrefix = memberPrefix;
+		this.collectionPrefix = collectionPrefix;
 		this.requestHasBody = requestHasBody;
 	}
 	
@@ -48,8 +50,12 @@ public enum RamlResourceMethodType {
 		return ordinal;
 	}
 	
-	public String getPrefix() {
-		return prefix;
+	public String getMemberPrefix() {
+		return memberPrefix;
+	}
+	
+	public String getCollectionPrefix() {
+		return collectionPrefix;
 	}
 	
 	public boolean requestHasBody() {

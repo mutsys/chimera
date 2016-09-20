@@ -1,8 +1,14 @@
 #%RAML 1.0
 title: RAML example 3
 
+uses:
+  codeGen: java-codegen-annotations.raml
+
 types:
   Foo:
+    (codeGen.javaClassType): interface
+    (codeGen.javaClassName): Foo
+    (codeGen.javaPackageName): com.mutsys.exampleThree
     type: object
     properties:
       code:
@@ -10,7 +16,11 @@ types:
       name:
         type: string
 
+
 /things:
+  (codeGen.javaClassType): interface
+  (codeGen.javaClassName): ThingResource
+  (codeGen.javaPackageName): com.mutsys.exampleThree.resource
   get:
     responses:
       200:
